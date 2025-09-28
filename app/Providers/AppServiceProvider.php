@@ -25,8 +25,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
-
         Event::listen(Failed::class, function ($event) {
             Telescope::tag(fn() => ['auth', 'failed-login']);
 
