@@ -11,46 +11,60 @@ class EloquentUserRepository implements UserRepositoryInterface
     public function create(UserEntity $entity): UserEntity
     {
         $user = new User();
-        $user->id    = $entity->getId();
-        $user->name  = $entity->getName();
-        $user->email = $entity->getEmail();
+        $user->id       = $entity->getId();         // optional if DB generates
+        $user->name     = $entity->getName();
+        $user->email    = $entity->getEmail();
+        $user->password = $entity->getPassword();   // already hashed
         $user->save();
 
-        return new UserEntity($user->id, $user->name, $user->email);
-    }
-
-    public function findById(string $id): ?UserEntity
-    {
-        $user = User::find($id);
-        return $user ? new UserEntity($user->id, $user->name, $user->email) : null;
+        // Return a new UserEntity with DB-generated data
+        return new UserEntity(
+            $user->id,
+            $user->name,
+            $user->email,
+            $user->password
+        );
     }
 
     public function findByEmail(string $email): ?UserEntity
     {
         $user = User::where('email', $email)->first();
-        return $user ? new UserEntity($user->id, $user->name, $user->email) : null;
+        if (!$user) return null;
+
+        return new UserEntity(
+            $user->id,
+            $user->name,
+            $user->email,
+            $user->password
+        );
     }
 
-    public function all(): array
+    public function findById(string $id): ?UserEntity
     {
-        return User::all()
-            ->map(fn($user) => new UserEntity($user->id, $user->name, $user->email))
-            ->toArray();
+        $user = User::find($id);
+        if (!$user) return null;
+
+        return new UserEntity(
+            $user->id,
+            $user->name,
+            $user->email,
+            $user->password
+        );
     }
 
     public function update(UserEntity $entity): UserEntity
     {
         $user = User::findOrFail($entity->getId());
-        $user->name  = $entity->getName();
-        $user->email = $entity->getEmail();
+        $user->name     = $entity->getName();
+        $user->email    = $entity->getEmail();
+        $user->password = $entity->getPassword();
         $user->save();
 
-        return new UserEntity($user->id, $user->name, $user->email);
-    }
-
-    public function delete(string $id): void
-    {
-        $user = User::findOrFail($id);
-        $user->delete();
+        return new UserEntity(
+            $user->id,
+            $user->name,
+            $user->email,
+            $user->password
+        );
     }
 }
